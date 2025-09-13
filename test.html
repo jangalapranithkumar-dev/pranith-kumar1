@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simple Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 10px;
+    }
+    .hidden {
+      display: none;
+    }
+    button {
+      margin-top: 10px;
+    }
+    .feedback {
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to the Quiz!</h1>
+
+  <div id="start-screen">
+    <label>
+      Enter your name: <br />
+      <input type="text" id="name-input" />
+    </label>
+    <br /><br />
+    <label>
+      What subject do you want to study today? <br />
+      <select id="subject-select">
+        <option value="Math">Math</option>
+        <option value="Science">Science</option>
+      </select>
+    </label>
+    <br /><br />
+    <button id="start-btn">Start Quiz</button>
+  </div>
+
+  <div id="quiz-screen" class="hidden">
+    <div id="question-container">
+      <p id="question-text"></p>
+      <input type="text" id="answer-input" />
+      <br />
+      <button id="submit-answer-btn">Submit Answer</button>
+    </div>
+    <p id="answer-feedback"></p>
+    <p id="score-text"></p>
+  </div>
+
+  <div id="result-screen" class="hidden">
+    <h2>Quiz Results</h2>
+    <p id="final-score"></p>
+    <p id="final-feedback"></p>
+    <button id="restart-btn">Take Quiz Again</button>
+  </div>
+
+  <script>
+    const questions = {
+      Math: [
+        { question: "What is 5 + 7?", answer: "12" },
+        { question: "What is 9 * 3?", answer: "27" },
+        { question: "What is 15 / 3?", answer: "5" },
+      ],
+      Science: [
+        { question: "What planet is known as the Red Planet?", answer: "Mars" },
+        { question: "What gas do plants absorb from the atmosphere?", answer: "Carbon dioxide" },
+        { question: "What is H2O commonly known as?", answer: "Water" },
+      ],
+    };
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let selectedSubject = "Math";
+    let studentName = "";
+
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const answerInput = document.getElementById("answer-input");
+    const answerFeedback = document.getElementById("answer-feedback");
+    const scoreText = document.getElementById("score-text");
+    const finalScore = document.getElementById("final-score");
+    const finalFeedback = document.getElementById("final-feedback");
+
+    document.getElementById("start-btn").addEventListener("click", () => {
+      studentName = document.getElementById("name-input").value.trim();
+      selectedSubject = document.getElementById("subject-select").value;
+
+      if (!studentName) {
+        alert("Please enter your name!");
+        return;
+      }
+
+      if (!questions[selectedSubject]) {
+        alert(`Sorry, no questions for ${selectedSubject}. Defaulting to Math.`);
+        selectedSubject = "Math";
+      }
+
+      currentQuestionIndex = 0;
+      score = 0;
+
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      resultScreen.classList.add("hidden");
+
+      showQuestion();
+    });
+
+    document.getElementById("submit-answer-btn").addEventListener("click", () => {
+      const userAnswer = answerInput.value.trim();
+
+      if (!userAnswer) {
+        alert("Please enter an answer!");
+        return;
+      }
+
+      const correctAnswer = questions[selectedSubject][currentQuestionIndex].answer;
+
+      if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
+        answerFeedback.textContent = "Correct!";
+        score++;
+      } else {
+        answerFeedback.textContent = `Oops! The correct answer is ${correctAnswer}.`;
+      }
+
+      scoreText.textContent = `Score: ${score} / ${questions[selectedSubject].length}`;
+      answerInput.value = "";
+      answerInput.disabled = true;
+      document.getElementById("submit-answer-btn").disabled = true;
+
+      currentQuestionIndex++;
+
+      if (currentQuestionIndex < questions[selectedSubject].length) {
+        setTimeout(() => {
+          answerFeedback.textContent = "";
+          answerInput.disabled = false;
+          document.getElementById("submit-answer-btn").disabled = false;
+          showQuestion();
+        }, 1500);
+      } else {
+        setTimeout(showResults, 1500);
+      }
+    });
+
+    document.getElementById("restart-btn").addEventListener("click", () => {
+      startScreen.classList.remove("hidden");
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.add("hidden");
+      answerFeedback.textContent = "";
+      scoreText.textContent = "";
+      answerInput.value = "";
+    });
+
+    function showQuestion() {
+      const currentQ = questions[selectedSubject][currentQuestionIndex];
+      questionText.textContent = currentQ.question;
+      answerInput.focus();
+    }
+
+    function showResults() {
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+
+      finalScore.textContent = `${studentName}, you scored ${score} out of ${questions[selectedSubject].length}!`;
+      const percentage = (score / questions[selectedSubject].length) * 100;
+
+      if (percentage === 100) {
+        finalFeedback.textContent = "Excellent work! You mastered the material.";
+      } else if (percentage >= 70) {
+        finalFeedback.textContent = "Good job! Keep practicing to improve even more.";
+      } else {
+        finalFeedback.textContent = "Don't worry! Review the material and try again.";
+      }
+    }
+  </script>
+</body>
+</html>
